@@ -1,4 +1,4 @@
-import React , {useState} from 'react';
+import React , {useState, useEffect} from 'react';
 
 import MainGrid from '../src/components/MainGrid'
 import Box from '../src/components/Box';
@@ -22,6 +22,29 @@ function ProfileSideBar(propriedades){
   )
 
 }
+function ProfileRelationsBox(propriedades){
+  return(
+    <ProfileRelationsBoxWrapper>  
+            <h2 className="smallTitle">
+              propriedades.title({propriedades.items.length})
+            </h2>          
+          <ul>
+
+           {/*{seguidores.map((itemAtual) => {
+              return (
+                <li key={itemAtual.Id}>
+                  <a href={`https://github.com/${itemAtual}.png`}>
+                    <img src={itemAtual.image}/>
+                    <span>{itemAtual.title}</span>
+                  </a>
+
+                  </li>
+                  )
+                })}*/}
+          </ul>
+        </ProfileRelationsBoxWrapper>
+  )
+}
 
 export default function Home() {
   const [comunidades,setComunidades]=useState([{
@@ -29,9 +52,21 @@ export default function Home() {
     title: 'Eu odeio acordar cedo',
     image: 'https://alurakut.vercel.app/capa-comunidade-01.jpg'
   }])
-  const githubUser = 'gomessgbr';
-  //const comunidades = ['AluraKut'];
+  const githubUser = 'gomessgbr';   
   const pessoasFavoritas = ['juunegreiros', 'omariosouto', 'peas', 'rafaballerini', 'marcobrunodev', 'felipefialho']
+  const [seguidores,setSeguidores]=useState([]);
+
+    useEffect(()=>{
+      fetch('https://api.github.com/users/gomessgbr/followers')
+        .then((respostaDoServidor)=>{
+          return respostaDoServidor.json();
+      })
+      .then((respostaCompleta)=>{
+        setSeguidores(respostaCompleta)
+      })
+    },[])
+
+
   return (
     <>
       <AlurakutMenu githubUser='gomessgbr'/>
@@ -82,6 +117,9 @@ export default function Home() {
           </Box>
         </div>
         <div className="profileRelationsArea" style={{gridArea: 'profileRelationsArea'}}>
+        
+        <ProfileRelationsBox title="seguidores" items={seguidores}/>
+        
         <ProfileRelationsBoxWrapper>            
           <ul>
 
