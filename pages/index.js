@@ -47,12 +47,8 @@ function ProfileRelationsBox(propriedades){
 }
 
 export default function Home() {
-  const [comunidades,setComunidades]=useState([{
-    id:'241414214142141341241',
-    title: 'Eu odeio acordar cedo',
-    image: 'https://alurakut.vercel.app/capa-comunidade-01.jpg'
-  }])
   const githubUser = 'gomessgbr';   
+  const [comunidades,setComunidades]=useState([])
   const pessoasFavoritas = ['juunegreiros', 'omariosouto', 'peas', 'rafaballerini', 'marcobrunodev', 'felipefialho']
   const [seguidores,setSeguidores]=useState([]);
 
@@ -64,6 +60,30 @@ export default function Home() {
       .then((respostaCompleta)=>{
         setSeguidores(respostaCompleta)
       })
+
+      //API GraphQL
+      fetch('https://graphql.datocms.com/', {
+        method: 'POST',
+        headers :{
+          'Authorization': '0b3fefd1f9de1bdcdd197c574746f2',
+          'Content-Type' : 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({ "query": `query {
+          allCommunities {
+            title
+            id
+            imageUrl
+          }
+        }`  }) 
+      })
+      .then((response) => response.json())
+      .then ((respostaCompleta) => {
+        const comunidadesVindasDoDato = respostaCompleta.data.allCommunities;
+        console.log(comunidadesVindasDoDato)
+        setComunidades(comunidadesVindasDoDato)
+      })
+
     },[])
 
 
@@ -86,14 +106,27 @@ export default function Home() {
             <form onSubmit={(e)=>{
               e.preventDefault();
               const dadosDoForm= new FormData(e.target);
-              const comunidade = {
-                id: new Date().toISOString(),
+              const comunidade = {                
                 titulo: dadosDoForm.get('title'),
-                iamge: dadosDoForm.get('image'),
+                imageUrl: dadosDoForm.get('image'),
               }
 
-              const comunidadesAtualizadas = [...comunidades, comunidade];
-              setComunidades(comunidadesAtualizadas)
+              fetch('/api/comunidades', {
+                method: 'POST',
+                headers:{
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(comunidade)
+              })
+              .then(async(response)=>{
+                const dados = await response.json();
+                console.log(dados)
+                const comunidade = dados.registroCriado;
+                const comunidadesAtualizadas = [...comunidades, comunidade];
+                setComunidades(comunidadesAtualizadas)
+              })
+
+              
             }} >
               <div>
                 <input  
